@@ -124,7 +124,7 @@ SELECT * FROM orders
 WHERE YEAR(OrderDate) = 1997 AND MONTH(OrderDate) = 3
 
 -- Dla każdego zamówienia wyświetl ile dni upłynęło od daty zamówienia do daty wysyłki
-SELECT ShippedDate, RequireDdate, DATEDIFF(day, ShippedDate, RequiredDate) AS DaysBetween
+SELECT ShippedDate, RequireDdate, DATEDIFF(day, ShippedDate, OrderDate) AS DaysBetween
 FROM orders
 WHERE ShippedDate IS NOT NULL
 
