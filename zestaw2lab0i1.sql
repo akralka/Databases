@@ -9,7 +9,7 @@ select MAX(Unitprice) from Products where unitprice < 20.00
 -- 3. Podaj maksymalną i minimalną i średnią cenę produktu dla produktów o
 -- produktach sprzedawanych w butelkach (‘bottle’)
 select MAX(unitprice) AS max, MIN(UnitPrice) AS min, AVG(UnitPrice) AS avg from Products
- where QuantityPerUnit LIKE '%bottle%'
+where QuantityPerUnit LIKE '%bottle%'
 
 -- 4. Wypisz informację o wszystkich produktach o cenie powyżej średniej
 SELECT * FROM products WHERE UnitPrice > (SELECT AVG(UnitPrice) FROM products)
@@ -41,6 +41,11 @@ GROUP BY ShipVia
 order by num_orders DESC
 
 -- 1. Wyświetl zamówienia dla których liczba pozycji zamówienia jest większa niż 5
+select OrderID  from  [Order Details]
+group by OrderID
+having count(*) > 5
+
+
 SELECT OrderID, OrderDate
 FROM Orders
 WHERE OrderID IN (
@@ -58,20 +63,18 @@ having count(*) > 5
 -- 2. Wyświetl klientów dla których w 1998 roku zrealizowano więcej niż 8 zamówień
 -- (wyniki posortuj malejąco wg łącznej kwoty za dostarczenie zamówień dla
 -- każdego z klientów)
-SELECT c.CustomerID, c.CompanyName, SUM(od.UnitPrice * od.Quantity) AS total_spent
-FROM Customers c, Orders o, [Order Details] od
-WHERE c.CustomerID = o.CustomerID
-AND o.OrderID = od.OrderID
-AND YEAR(o.OrderDate) = 1998
-AND c.CustomerID IN (
-  SELECT CustomerID
-  FROM Orders
-  WHERE YEAR(OrderDate) = 1998
-  GROUP BY CustomerID
-  HAVING COUNT(*) > 8
+select customerid , sum(Freight) as price from Orders o 
+join [Order Details] od ON
+o.OrderID = od.OrderID
+where year(ShippedDate) = 1998
+and CustomerID IN (
+    select CustomerID from orders
+    where year(ShippedDate) = 1998
+    group by [CustomerID]
+    having count(*) > 8
 )
-GROUP BY c.CustomerID, c.CompanyName
-ORDER BY total_spent DESC
+group by CustomerID
+order by price desc
 
 
 -- ------2.1-----------------------------------------
