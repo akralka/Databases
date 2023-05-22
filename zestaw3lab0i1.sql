@@ -353,57 +353,9 @@ WHERE CC.CustomerID IS NULL
 
 -----------------------przykłady--------------------------------------
 
--- select sum(UnitPrice*Quantity*(1-Discount))
--- from [Order Details]
--- where OrderID = 10250
-
--- select Freight
--- from Orders
--- where OrderID = 10250
-
-use joindb
-select * from Produce
-select * from Sales
-select * from Buyers
-
-
-select buyer_name, s.buyer_id, prod_id, qty 
-from buyers JOIN sales as s
-ON buyers.buyer_id = s.buyer_id
-
---TO SAMO CO WYŻEJ:
-
-select buyer_name, s.buyer_id, prod_id, qty 
-from buyers b, sales as s
-WHERE b.buyer_id = s.buyer_id
-
-SELECT buyer_name, sales.buyer_id, qty
-FROM buyers left OUTER JOIN sales
-ON buyers.buyer_id = sales.buyer_id
-
-use Northwind
-SELECT productname, companyname
-FROM products
-INNER JOIN suppliers
-ON products.supplierid = suppliers.supplierid
-
--- dla kazdego dostawcy liczba dostarczancyh zamowien:
-select SupplierID, count(*) as liczba
-from Products
-group by SupplierID
-
--- połączone:
-SELECT products.supplierid, companyname, count(*) as 'liczba zamowień na poszczególnego'
-FROM products
-INNER JOIN suppliers
-ON products.supplierid = suppliers.supplierid
-group by products.supplierid, CompanyName
-
-select * from Customers
-select * from Orders
-
-SELECT companyname, customers.customerid, orderdate
-FROM customers
-LEFT JOIN orders
-ON customers.customerid = orders.customerid
-where orderdate IS NULL
+-- dla kazdego dostawcy liczba dostarczanych zamowien:
+SELECT p.supplierid, companyname, count(*) as 'liczba zamowień'
+FROM products p
+JOIN suppliers s
+ON p.supplierid = s.supplierid
+group by p.supplierid, CompanyName
