@@ -68,58 +68,66 @@ WHERE SupplierID IN (
   WHERE UnitsInStock = 0
 );
 
-
 -------------------------------------------------------------------------------------
 -- Zadanie1: dla każdego kliena podaj w ilu różnych miesiącach i latach robił zakupy w 1997r
 
--- SELECT C.CustomerID, COUNT(DISTINCT YEAR(OrderDate)) AS ROCZEK, COUNT(DISTINCT MONTH(OrderDate)) AS MIESIAC
--- FROM CUSTOMERS C LEFT JOIN ORDERS O ON
--- C.CustomerID = O.CustomerID AND YEAR(O.OrderDate) = 1997
--- GROUP BY C.CustomerID
+SELECT C.CustomerID, COUNT(DISTINCT YEAR(OrderDate)) AS ROCZEK, COUNT(DISTINCT MONTH(OrderDate)) AS MIESIAC
+FROM CUSTOMERS C LEFT JOIN ORDERS O ON
+C.CustomerID = O.CustomerID AND YEAR(O.OrderDate) = 1997
+GROUP BY C.CustomerID
 
 -- Zadanie2: Dla każdego klienta podaj liczbę zamówień w każdym z miesięcy 1997, 98
--- SELECT C.CustomerID, YEAR(O.OrderDate) AS YearDate, 
---     MONTH(O.OrderDate) AS MonthDate, COUNT(MONTH(O.OrderDate)) AS MonthCount
--- FROM Customers AS C
--- LEFT JOIN Orders AS O
--- ON C.CustomerID = O.CustomerID AND YEAR(O.OrderDate) IN (1997, 1998)
--- GROUP BY YEAR(O.OrderDate), MONTH(O.OrderDate), C.CustomerID
--- ORDER BY C.CustomerID
+SELECT C.CustomerID, YEAR(O.OrderDate) AS YearDate, 
+MONTH(O.OrderDate) AS MonthDate, COUNT(MONTH(O.OrderDate)) AS MonthCount
+FROM Customers AS C
+LEFT JOIN Orders AS O
+ON C.CustomerID = O.CustomerID AND YEAR(O.OrderDate) IN (1997, 1998)
+GROUP BY YEAR(O.OrderDate), MONTH(O.OrderDate), C.CustomerID
+ORDER BY C.CustomerID
 
 -- Zadanie3:  Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłki dostarczała firma ‘United Package’
-
--- select c.CompanyName, c.phone
--- from customers c join orders o on o.CustomerID=c.CustomerID
--- AND YEAR(o.OrderDate) = 1997
--- AND o.ShipVia IN (
---     select ShipperID
---     from Shippers
---     where CompanyName = 'United Package'
--- )
+select c.CompanyName, c.phone
+from customers c join orders o on o.CustomerID=c.CustomerID
+where YEAR(ShippedDate) = 1997
+AND o.ShipVia IN (
+    select ShipperID
+    from Shippers
+    where CompanyName = 'United Package'
+)
 
 -- Zadanie3.1 zmodyfikuj tak, zeby podac liczbę takich zamowien które były zrealizowane dla konkretnego klienta: 
--- select c.CompanyName, count(CompanyName) AS NumOrders
--- from customers c join orders o on o.CustomerID=c.CustomerID
--- AND YEAR(o.OrderDate) = '1997'
--- AND o.ShipVia IN (
---     select ShipperID
---     from Shippers
---     where CompanyName = 'United Package'
--- )
--- group by CompanyName
+select c.CompanyName, count(CompanyName) AS NumOrders
+from customers c join orders o on o.CustomerID=c.CustomerID
+AND YEAR(o.ShippedDate) = '1997'
+AND o.ShipVia IN (
+    select ShipperID
+    from Shippers
+    where CompanyName = 'United Package'
+)
+group by CompanyName
 
 -- Zadanie4: Wybierz nazwy i numery telefonów klientów , którym w 1997 roku przesyłek nie dostarczała firma ‘United Package’
--- select c.CompanyName, c.phone
--- from customers c join orders o on o.CustomerID=c.CustomerID
--- AND YEAR(o.OrderDate) = 1997
--- AND o.ShipVia NOT IN (
---     select ShipperID
---     from Shippers
---     where CompanyName = 'United Package'
--- )
+select distinct CustomerID from Customers 
+where CustomerID not in(
+select distinct c.CustomerID
+from customers c join orders o on o.CustomerID=c.CustomerID
+AND YEAR(o.OrderDate) = 1997
+AND o.ShipVia IN (
+    select ShipperID
+    from Shippers
+    where CompanyName = 'United Package'
+))
 
-
--- select count(*) from Orders where YEAR(OrderDate) = 1997
+SELECT c.CompanyName, c.phone
+FROM Customers c
+WHERE c.CustomerID NOT IN (
+    SELECT DISTINCT c.CustomerID
+    FROM customers c
+    JOIN orders o ON o.CustomerID = c.CustomerID
+    JOIN Shippers s ON o.ShipVia = s.ShipperID
+    WHERE YEAR(o.OrderDate) = 1997
+    AND s.CompanyName = 'United Package'
+)
 -------------------------------------------------------------------------------------
 -- 1. Napisz polecenie, które wyświetla listę dzieci będących członkami biblioteki (baza
 -- library). Interesuje nas imię, nazwisko i data urodzenia dziecka.
