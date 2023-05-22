@@ -55,18 +55,19 @@ WHERE CustomerID NOT IN (
 
 -- 4. Wybierz nazwy i numery telefonów dostawców, dostarczających produkty,
 -- których aktualnie nie ma w magazynie
--- SELECT DISTINCT Suppliers.CompanyName, Suppliers.Phone
--- FROM Products
--- JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID
--- WHERE Products.UnitsInStock = 0;
+SELECT DISTINCT Suppliers.CompanyName, Suppliers.Phone
+FROM Products
+JOIN Suppliers ON Products.SupplierID = Suppliers.SupplierID
+WHERE Products.UnitsInStock = 0;
 
--- SELECT CompanyName, Phone
--- FROM Suppliers
--- WHERE SupplierID IN (
---   SELECT DISTINCT SupplierID
---   FROM Products
---   WHERE UnitsInStock = 0
--- );
+SELECT CompanyName, Phone
+FROM Suppliers
+WHERE SupplierID IN (
+  SELECT DISTINCT SupplierID
+  FROM Products
+  WHERE UnitsInStock = 0
+);
+
 
 -------------------------------------------------------------------------------------
 -- Zadanie1: dla każdego kliena podaj w ilu różnych miesiącach i latach robił zakupy w 1997r
