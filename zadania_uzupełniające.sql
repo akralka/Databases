@@ -12,32 +12,30 @@ and year(lh.in_date) = 2001
 and  month(lh.in_date) = 12
 and day(lh.in_date) = 14
 
-
--- 2)
--- Podaj nazwy produktów należących do kategorii 'Dairy Products',
+-- 2) Podaj nazwy produktów należących do kategorii 'Dairy Products',
 -- które w marcu 1997 nie były kupowane przez klientów z Francji.
 -- Dla każdego takiego produktu podaj jego nazwę, cenę, oraz nazwę
 -- dostawcy (dostawcy to suppliers). Zbiór wynikowy powinien zawierać
 -- nazwę produktu, cenę, nazwę dostawcy. Zbiór wynikowy powinien być
 -- uporządkowany wg nazwy produktu. (baza northwind)
-
-select pr.productname, pr.unitprice, s.CompanyName from Products pr join Suppliers s on s.SupplierID = pr.SupplierID
-join Categories c on c.CategoryID = pr.CategoryID
-left join(
-select distinct p.productname from  Products p JOIN
-[Order Details] od on od.ProductID = p.ProductID JOIN
-Orders o on o.OrderID = od.OrderID join 
-[Customers] Cus on cus.CustomerID = o.CustomerID 
-and cus.Country = 'France'
-and year(o.OrderDate) = 1997
-and month(o.OrderDate) = 03
+    
+use Northwind
+select pr.ProductName, pr.UnitPrice, s.CompanyName from Categories cat join Products pr on pr.CategoryID = cat.CategoryID join 
+Suppliers s on s.SupplierID = pr.SupplierID
+left join (
+    select p.ProductName from customers c join orders o on o.customerid = c.customerid
+    join [Order Details] od on od.OrderID = o.OrderID join Products p on 
+    p.ProductID = od.ProductID
+    where c.Country = 'France'
+    and year(OrderDate) = 1997
+    and month(orderdate) = 03
 ) as t 
-on t.ProductName = pr.ProductName
-where t.ProductName IS NULL
-and c.CategoryName = 'Dairy Products'
+on t.ProductName = pr.productname
+where t.ProductName is NULL
+and cat.CategoryName = 'Dairy Products'
 order by ProductName
-
-----------------------------------------------
+    
+----------------------------------------------------------------------------
 SELECT Products.ProductName, Products.UnitPrice, S.CompanyName FROM 
 Products
 INNER JOIN Categories C on C.CategoryID = Products.CategoryID
@@ -260,3 +258,22 @@ LEFT JOIN (
 ) AS CC
 ON CA.CustomerID = CC.CustomerID
 WHERE CC.CustomerID IS NULL 
+
+    
+-- 9.)Napisz polecenie które wyświetla imiona i nazwiska dorosłych członków biblioteki,
+--  mieszkających w Arizonie (AZ) lub Kalifornii (CA),
+--  których wszystkie dzieci są urodzone przed '2000-10-14'
+
+use library
+SELECT DISTINCT mr.firstname, mr.lastname
+FROM adult a
+JOIN member mr ON a.member_no = mr.member_no
+LEFT JOIN juvenile j ON a.member_no = j.adult_member_no  --left bo uwzgledniamy kto ma dzieci
+WHERE state IN ('AZ', 'CA')
+  AND NOT EXISTS (
+    SELECT *
+    FROM juvenile j2
+    WHERE j2.adult_member_no = a.member_no --Jeśli nie istnieje żadne dziecko, które jest urodzone po
+    AND j2.birth_date >= '2000-10-14'    -- '2000-10-14', to wybieramy
+  );                              
+
