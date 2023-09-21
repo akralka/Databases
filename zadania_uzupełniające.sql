@@ -277,3 +277,48 @@ WHERE state IN ('AZ', 'CA')
     AND j2.birth_date >= '2000-10-14'    -- '2000-10-14', to wybieramy
   );                              
 
+ -- 10.) Imie nazwisko i adres czytelnika, ile książek wypożyczył aktualnie. Jesli żadnej to też ma sie pojawić
+SELECT c.FirstName, c.LastName, c.Address, COALESCE(COUNT(b.BookID), 0) AS BooksBorrowed
+FROM Borrowers b
+RIGHT JOIN Customers c ON b.CardID = c.CardID
+WHERE b.Status IN ('borrowed', 'overdue') OR b.Status IS NULL
+GROUP BY c.FirstName, c.LastName, c.Address
+ORDER BY c.LastName, c.FirstName
+
+---------
+SELECT c.FirstName, c.LastName, c.Address, COALESCE((
+    SELECT COUNT(*)
+    FROM Borrowers b
+    WHERE b.CardID = c.CardID AND b.Status IN ('borrowed', 'overdue')
+), 0) AS BooksBorrowed
+FROM Customers c
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM Borrowers b
+    WHERE b.CardID = c.CardID AND b.Status IN ('borrowed', 'overdue')
+)
+ORDER BY c.LastName, c.FirstName
+
+
+-- 11.) Liczba i ilość zamówień dla każdego klienta w lutym 1997. Jeśli nie składał, też ma być na liście
+SELECT Customers.CompanyName, ISNULL(COUNT(DISTINCT Orders.OrderID), 0) AS LiczbaZamowien, ISNULL(SUM((OrderDetails.UnitPrice * OrderDetails.Quantity * (1 - OrderDetails.Discount))) + ISNULL(Orders.Freight, 0), 0) AS SumaZamowien
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID AND YEAR(Orders.OrderDate) = 1997 AND MONTH(Orders.OrderDate) = 2
+LEFT JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID
+GROUP BY Customers.CompanyName
+ORDER BY Customers.CompanyName
+
+
+-- 12.) Klienci którzy nigdy nie zamówili produktu z kat. 'Seafood'
+SELECT DISTINCT CompanyName
+FROM Customers
+LEFT JOIN (
+    SELECT DISTINCT Orders.CustomerID
+    FROM Orders
+    INNER JOIN [Order Details] ON Orders.OrderID = [Order Details].OrderID
+    INNER JOIN Products ON [Order Details].ProductID = Products.ProductID
+    INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID
+    WHERE Categories.CategoryName = 'Seafood'
+) AS SeafoodCustomers
+ON Customers.CustomerID = SeafoodCustomers.CustomerID
+WHERE SeafoodCustomers.CustomerID IS NULL
